@@ -1,14 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  tools:context=".presentations.fragments.editor.EditItemFragment">
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  tools:context=".presentations.fragments.editor.EditItemFragment"
+  android:padding="15dp">
 
-  <!-- TODO: Update blank fragment layout -->
-  <TextView
+  <EditText
+    android:id="@+id/item_title_et"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:text="@string/hello_blank_fragment" />
+    android:layout_height="wrap_content"
+    android:hint="@string/title_et_hint"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:inputType="text"
+    android:importantForAutofill="no"
+    />
 
-</FrameLayout>
+  <EditText
+    android:id="@+id/item_text_et"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="@string/text_et_hint"
+    android:layout_marginTop="10dp"
+    app:layout_constraintTop_toBottomOf="@id/item_title_et"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:inputType="text"
+    android:importantForAutofill="no"
+    />
+
+  <TextView
+    android:id="@+id/priority_tv"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/priority"
+    android:textSize="16sp"
+    android:layout_marginTop="10dp"
+    app:layout_constraintTop_toBottomOf="@id/item_text_et"
+    app:layout_constraintStart_toStartOf="parent"
+    />
+  
+  <RadioGroup
+    android:id="@+id/priority_radio_group"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    app:layout_constraintTop_toBottomOf="@id/priority_tv"
+    android:orientation="horizontal"
+    android:checkedButton="@id/radio_priority_1"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_chainStyle="spread"
+    >
+
+    <RadioButton
+      android:id="@+id/radio_priority_1"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/priority_normal_radiobutton"
+      android:textColor="@color/black"
+      android:textSize="15sp"
+      android:layout_weight="1"
+      />
+
+    <RadioButton
+      android:id="@+id/radio_priority_3"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/priority_low_radiobutton"
+      android:textColor="@color/green"
+      android:textSize="15sp"
+      android:layout_weight="1"
+      />
+
+    <RadioButton
+      android:id="@+id/radio_priority_2"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/priority_high_radiobutton"
+      android:textColor="@color/red"
+      android:textSize="15sp"
+      android:layout_weight="1"
+      />
+
+  </RadioGroup>
+
+  <Button
+    android:id="@+id/delete_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/delete_text_btn"
+    android:backgroundTint="@color/red"
+    android:layout_marginTop="30dp"
+    android:minWidth="120dp"
+    app:layout_constraintTop_toBottomOf="@id/priority_radio_group"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/create_button"
+    app:layout_constraintHorizontal_chainStyle="spread"
+    />
+
+  <Button
+    android:id="@+id/create_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/save_text_btn"
+    android:backgroundTint="@color/green"
+    android:minWidth="120dp"
+    app:layout_constraintTop_toTopOf="@id/delete_button"
+    app:layout_constraintStart_toEndOf="@id/delete_button"
+    app:layout_constraintEnd_toEndOf="parent"
+    />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

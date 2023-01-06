@@ -1,12 +1,17 @@
 package com.example.todolist.data.room.entities
 
 import androidx.room.ColumnInfo
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.todolist.data.entites.TodoItem
 
+@Entity(
+  tableName = "todoList"
+)
 data class TodoDbEntity(
   @ColumnInfo(name="id") @PrimaryKey(autoGenerate = true) val id: Int,
   @ColumnInfo(name="title") val title: String,
+  @ColumnInfo(name="text") val text: String? = null,
   @ColumnInfo(name="created_at") val createdAt: String,
   @ColumnInfo(name="priority") val priority: Int,
   @ColumnInfo(name="status") val status: Boolean
