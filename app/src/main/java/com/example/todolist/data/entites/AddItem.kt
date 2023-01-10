@@ -1,9 +1,8 @@
 package com.example.todolist.data.entites
 
-data class TodoItem(
-  val id: Int,
+data class AddItem(
   val title: String,
-  val text: String? = null,
+  var text: String? = null,
   val createdAt: String,
   val priority: Int,
   val status: Boolean = false,

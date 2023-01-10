@@ -3,6 +3,7 @@ package com.example.todolist.data.room.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.todolist.data.entites.AddItem
 import com.example.todolist.data.entites.TodoItem
 
 @Entity(
@@ -14,7 +15,7 @@ data class TodoDbEntity(
   @ColumnInfo(name="text") val text: String? = null,
   @ColumnInfo(name="created_at") val createdAt: String,
   @ColumnInfo(name="priority") val priority: Int,
-  @ColumnInfo(name="status") val status: Boolean
+  @ColumnInfo(name="status") var status: Boolean = false
 ) {
   fun toTodoItem(): TodoItem {
     return TodoItem(
@@ -27,13 +28,13 @@ data class TodoDbEntity(
   }
 
   companion object {
-    fun createTodoDbEntity(todoItem: TodoItem): TodoDbEntity {
+    fun createTodoDbEntity(addItem: AddItem): TodoDbEntity {
       return TodoDbEntity(
         id = 0,
-        title = todoItem.title,
-        createdAt = todoItem.createdAt,
-        priority = todoItem.priority,
-        status = todoItem.status
+        title = addItem.title,
+        createdAt = addItem.createdAt,
+        priority = addItem.priority,
+        status = addItem.status
       )
     }
   }

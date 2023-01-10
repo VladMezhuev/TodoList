@@ -11,4 +11,8 @@
   <string name="priority_high_radiobutton">Высокий</string>
   <string name="delete_text_btn">Удалить</string>
   <string name="save_text_btn">Сохранить</string>
+  <string name="list_is_empty_tv">List is empty</string>
+  <string name="add_item_title">Добавить</string>
+  <string name="edit_item_title">Изменить</string>
+  <string name="todo_list_title">Список задач</string>
 </resources>
