@@ -18,5 +18,18 @@
     android:id="@+id/editItemFragment"
     android:name="com.example.todolist.presentations.fragments.editor.EditItemFragment"
     android:label="fragment_edit_item"
-    tools:layout="@layout/fragment_edit_item" />
+    tools:layout="@layout/fragment_edit_item" >
+    <argument
+      android:name="item"
+      app:argType="com.example.todolist.data.room.entities.TodoDbEntity"
+      app:nullable="true"
+      android:defaultValue="@null" />
+    <action
+      android:id="@+id/action_editItemFragment_to_deleteDialogFragment"
+      app:destination="@id/deleteDialogFragment" />
+  </fragment>
+  <dialog
+    android:id="@+id/deleteDialogFragment"
+    android:name="com.example.todolist.presentations.fragments.dialogs.DeleteDialogFragment"
+    android:label="DeleteDialogFragment" />
 </navigation>

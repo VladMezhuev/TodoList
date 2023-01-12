@@ -2,11 +2,12 @@ package com.example.todolist.presentations.fragments.list
 
 import android.os.Bundle
 import android.util.Log
+import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -17,7 +18,6 @@ import com.example.todolist.databinding.FragmentListBinding
 import com.example.todolist.presentations.adapters.TodoDelegate
 import com.example.todolist.presentations.adapters.TodoListAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class ListFragment : Fragment() {
@@ -37,18 +37,24 @@ class ListFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
+    setHasOptionsMenu(true)
+
     initAdapter()
+
+//  RecycleView events
 
     todoListAdapter.attachDelegate(object : TodoDelegate {
       override fun editItem(item: TodoDbEntity) {
-        TODO("Not yet implemented")
+        toEditFragment(item)
       }
 
       override fun toggleStatus(item: TodoDbEntity) {
-        TODO("Not yet implemented")
+        viewModel.toggleStatus(item)
       }
 
     })
+
+//  Search
 
     binding.apply {
       addItemButton.setOnClickListener { toAddFragment() }
@@ -59,31 +65,78 @@ class ListFragment : Fragment() {
         }
 
         override fun onQueryTextChange(newText: String?): Boolean {
-//          viewLifecycleOwner.lifecycleScope.launchWhenCreated {
-//            viewModel.searchQuery.collect { query ->
-//
-//            }
-//          }
-          viewModel.searchHandle(newText)
-//          viewModel.searchQuery.value = newText
-//          viewModel.searchQuery.emit(newText)
+          viewModel.searchQuery.value = newText
           return true
         }
 
       })
     }
 
+// Fragment result
+
+    setFragmentResultListener("add_edit_request") { _, bundle ->
+      val result = bundle.getInt("add_edit_result")
+      viewModel.onAddEditResult(result)
+    }
+
+//  RecycleView conditions
+
     viewLifecycleOwner.lifecycleScope.launchWhenCreated {
       viewModel.todoList.collect { list ->
         if (list.isEmpty()) {
           binding.isEmptyTv.visibility = View.VISIBLE
+          setAdapterContent(list)
         } else {
           binding.isEmptyTv.visibility = View.GONE
-          todoListAdapter.setList(list)
+          setAdapterContent(list)
         }
       }
     }
+
+//  Events
+
+    viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+      viewModel.todoEvent.collect { event ->
+        when(event) {
+          is ListViewModel.TodoEvent.ShowTodoSavedMessage -> {
+            Toast.makeText(this@ListFragment.context, event.message, Toast.LENGTH_LONG).show()
+          }
+        }
+
+      }
+    }
+
   }
+
+//  Menu
+
+  override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    inflater.inflate(R.menu.menu_fragment, menu)
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when(item.itemId) {
+      R.id.action_sort_by_date -> {
+        viewModel.sortOrder.value = SortOrder.BY_DATE
+        Log.d("MyLog", viewModel.sortOrder.value.toString())
+        true
+      }
+      R.id.action_sort_by_priority -> {
+        viewModel.sortOrder.value = SortOrder.BY_PRIORITY
+        Log.d("MyLog", viewModel.sortOrder.value.toString())
+        true
+      }
+      else -> false
+    }
+  }
+
+//  Set adapter`s content
+
+  private fun setAdapterContent(list: List<TodoDbEntity>) {
+    todoListAdapter.setList(list)
+  }
+
+// Adapter
 
   private fun initAdapter() {
     binding.apply {
@@ -92,14 +145,19 @@ class ListFragment : Fragment() {
     }
   }
 
+//  Navigation
+
   private fun toAddFragment() {
     val bundle = Bundle()
     bundle.putInt("MODE", 1)
     findNavController().navigate(R.id.action_listFragment_to_editItemFragment, bundle)
   }
 
-  private fun toEditFragment() {
-    findNavController().navigate(R.id.action_listFragment_to_editItemFragment)
+  private fun toEditFragment(todoItem: TodoDbEntity) {
+    val bundle = Bundle()
+    bundle.putInt("MODE", 2)
+    bundle.putParcelable("item", todoItem)
+    findNavController().navigate(R.id.action_listFragment_to_editItemFragment, bundle)
   }
 
 }

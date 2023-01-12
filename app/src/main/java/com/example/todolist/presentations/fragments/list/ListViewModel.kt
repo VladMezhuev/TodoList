@@ -4,8 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todolist.AppDatabase
 import com.example.todolist.data.room.entities.TodoDbEntity
+import com.example.todolist.presentations.ADD_TODO_RESULT_OK
+import com.example.todolist.presentations.EDIT_TODO_RESULT_OK
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -16,51 +20,64 @@ class ListViewModel @Inject constructor (
   private val appDatabase: AppDatabase
 ): ViewModel() {
 
-  val searchQuery = MutableStateFlow<String?>("")
-//  val searchQuery get() = _searchQuery.asStateFlow()
+  var searchQuery = MutableStateFlow<String?>("")
+
+  val sortOrder = MutableStateFlow(SortOrder.BY_PRIORITY)
 
   private val _todoList = MutableStateFlow<List<TodoDbEntity>>(emptyList())
   val todoList: Flow<List<TodoDbEntity>>
     get() = _todoList.asStateFlow()
 
+  private val todoEventChannel = Channel<TodoEvent>()
+  val todoEvent = todoEventChannel.receiveAsFlow()
+
   init {
-//    getList()
-    searchHandle("")
+    setList()
   }
 
-//  private fun getList() {
-//    viewModelScope.launch {
-//      withContext(Dispatchers.IO) {
-//        appDatabase.getTodoListDao().getTodoList(searchQuery.value!!).collect { list ->
-//          _todoList.emit(list)
-//        }
-//      }
-//    }
-//  }
+  @OptIn(ExperimentalCoroutinesApi::class)
+  private fun setList() {
+    val todoFlow = combine(
+      searchQuery,
+      sortOrder
+    ) { query, sortOrder ->
+      Pair(query, sortOrder)
+    }.flatMapLatest { (query, sortOrder) ->
+      appDatabase.getTodoListDao().getTodoList(query!!, sortOrder)
+    }
 
-  fun searchHandle(query: String?) {
     viewModelScope.launch {
       withContext(Dispatchers.IO) {
-        searchQuery.emit(query)
-        searchQuery.collect {
-          appDatabase.getTodoListDao().getTodoList(it!!).collect { list ->
-            _todoList.emit(list)
-          }
+        todoFlow.collect { list ->
+          _todoList.emit(list)
         }
       }
     }
   }
 
-//  fun searchHandle(query: String?) {
-//    viewModelScope.launch {
-//      withContext(Dispatchers.IO) {
-//        if (query != null) {
-//          val searchList = _todoList.value.filter { item ->
-//            item.title.lowercase().contains(query.lowercase())
-//          }
-//          _todoList.emit(searchList)
-//        }
-//      }
-//    }
-//  }
+  fun toggleStatus(todoDbEntity: TodoDbEntity) {
+    viewModelScope.launch {
+      appDatabase.getTodoListDao().updateItem(todoDbEntity.copy(status = !todoDbEntity.status))
+    }
+  }
+
+  fun onAddEditResult(result: Int) {
+    when(result) {
+      ADD_TODO_RESULT_OK -> showTodoSavedMessage("Task added")
+      EDIT_TODO_RESULT_OK -> showTodoSavedMessage("Task updated")
+    }
+  }
+
+  private fun showTodoSavedMessage(text: String) {
+    viewModelScope.launch {
+      todoEventChannel.send(TodoEvent.ShowTodoSavedMessage(text))
+    }
+  }
+
+  sealed class TodoEvent {
+    data class ShowTodoSavedMessage(val message: String): TodoEvent()
+  }
+
 }
+
+enum class SortOrder { BY_DATE, BY_PRIORITY }
